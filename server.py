@@ -53,8 +53,11 @@ def handle_client(conn: object, addr):
 
 
 def check(sent, conn):
-    AllSent = re.split('\r\n\r\n', sent)
+    AllSent = re.split('\r\n', sent)
     Command = AllSent[0].split(" ")
+    print(Command)
+    # Webs=AllSent[1].split(":")   in case of postman
+    # Web = Webs[1].replace(" ", "")
     if Command[2] == "127.0.0.1":
         print("[SERVER] Local Searching........")
         if Command[0] == "POST":
@@ -70,12 +73,21 @@ def check(sent, conn):
             print("[SERVER] I am here in GET condition......")
             try:
                 file_name = Command[1].replace("/", "")
-                f = open(file_name, mode='r', encoding='utf-8')
-                data_read = f.read()
-                data = data_read.encode(FORMAT)
-                conn.send(data)
-                print("[SERVER] Done\n")
-                f.close()
+                if ".png" in file_name:
+                    f = open(file_name, mode='rb')
+                    data_read = f.read()
+                    data = data_read
+                    # print(data)
+                    conn.send(data)
+                    print("[SERVER] Done\n")
+                    f.close()
+                else:
+                    f = open(file_name, mode='r', encoding='utf-8')
+                    data_read = f.read()
+                    data = data_read.encode(FORMAT)
+                    conn.send(data)
+                    print("[SERVER] Done\n")
+                    f.close()
             except:
                 print("[SERVER] Error 404 Not Found ")
                 conn.send("[SERVER] Error 404 Not Found ")

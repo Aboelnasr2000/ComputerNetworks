@@ -2,10 +2,7 @@
 
 import socket
 import re
-import base64
 
-from PIL import Image
-import cv2
 # HOST = "127.0.0.1"  # The server's hostname or IP address
 import sys
 import time
@@ -46,8 +43,7 @@ def send_func(msg):
         print("\nFIRST TIME...............\n")
         if client_function[0] == "POST":
             data = send_file(client_function)
-            message = message + "\r\n\r\n"
-            message = message + data
+            message = message + "\r\n\r\n" + data
             s.send(message.encode(FORMAT))
             print("Command Sent\n")
             response = s.recv(1024).decode(FORMAT)
@@ -58,30 +54,42 @@ def send_func(msg):
             s.send(message.encode(FORMAT))
             print("Command Sent\n")
             print("Data Received ..... \n")
-            data = s.recv(4096).decode(FORMAT)
-            cache_st(client_fun, data.encode(FORMAT))
-            print(data + "\n\n")
+            if ".png" in client_function[1]:
+                print("[CLIENT] Received PNG Image")
+                data = s.recv(10000)
+                cache_st(client_fun, data)
+                # print(data)
+                f = open("Image.png", mode='wb')
+                f.write(data)
+                f.close()
+            else:
+                data = s.recv(10000).decode(FORMAT)
+                cache_st(client_fun, data.encode(FORMAT))
+                print(data + "\n\n")
 
 
 def file_open(Filename):
-    f = open(Filename, mode='r', encoding='utf-8')
-    data_read = f.read()
-    send_func(data_read)
-    f.close()
+    try:
+        f = open(Filename, mode='r', encoding='utf-8')
+        data_read = f.read()
+        send_func(data_read)
+        f.close()
+    except:
+        print("[CLIENT] Commands File Not Found")
+    return
 
 
 def send_file(client_send):
-    file_name = client_send[1]
-    if ".png" in file_name:
-        f = open("Light.png", mode='rb')
-        data_read = f.read()
-        f.close()
-        return data_read
-    else:
+    try:
+        file_name = client_send[1]
         f = open(file_name, mode='r', encoding='utf-8')
         data_read = f.read()
+        # print('Hello22222')
         f.close()
         return data_read
+    except:
+        print("File not on your PC")
+        return
 
 
 try:
